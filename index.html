@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="ru">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
+  <title>✉️</title>  
+  <style>  
+    :root{  
+      --bg1:#ffe3e9; --bg2:#f2bdc9;  
+      --paper:#ffffff; --shadow:rgba(0,0,0,.15);  
+      --pocket:#ffe0ea; --side:#ffd1e0;  
+      --flap-front:#ffc6d9; --flap-back:#ffd8e6;  
+      --accent:#333333; --text:#333;  
+    }  
+    *{box-sizing:border-box}  
+    html,body{height:100%}  
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);  
+      background:linear-gradient(135deg,var(--bg1),var(--bg2)); display:flex; align-items:center; justify-content:center; padding:24px}  
+    .app{width:100%; max-width:560px}/* Панель вопроса */  
+.panel{background:#fff; border-radius:20px; box-shadow:0 12px 32px var(--shadow); padding:20px; text-align:center}  
+h1{margin:0 0 12px}  
+.buttons{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}  
+button{border:0; border-radius:999px; padding:12px 20px; font-weight:700; cursor:pointer; background:#f79cad; color:#fff; box-shadow:0 8px 18px var(--shadow); transition:.25s}  
+button:hover,button:active{transform:translateY(-2px); background:var(--accent)}  
+.msg{height:28px; display:flex; align-items:center; justify-content:center; margin-top:8px; font-weight:700; color:#333333}  
+
+/* тряска текста */  
+@keyframes shake {  
+  0%,100%{transform:translateX(0)}  
+  20%{transform:translateX(-6px)}  
+  40%{transform:translateX(6px)}  
+  60%{transform:translateX(-6px)}  
+  80%{transform:translateX(6px)}  
+}  
+.shake{animation:shake 0.6s ease}  
+
+/* Сцена */  
+.stage{display:none; margin-top:16px; text-align:center}  
+.stage.show{display:block}  
+
+/* Конверт */  
+.envelope{position:relative; margin:18px auto 8px; width:340px; height:240px;  
+  perspective:1100px}  
+
+/* Задняя бумага */  
+.env-back{position:absolute; inset:0; background:#ffbdd1; border-radius:0px; box-shadow:0 10px 28px var(--shadow); z-index:1}  
+
+/* Письмо */  
+.letter{position:absolute; left:10%; bottom:12%; width:80%; height:62%; background:var(--paper); border-radius:12px; box-shadow:0 8px 20px var(--shadow);  
+  padding:14px; display:flex; align-items:center; justify-content:center; text-align:center;   
+  transform:translateY(28%); transition:transform .9s cubic-bezier(.2,.7,.2,1) .15s; z-index:10; overflow:auto}  
+.letter .greet{font-weight:800; color:var(--accent)}  
+
+/* Боковые и нижний клапаны-карман (передняя часть) */  
+.side{position:absolute; bottom:0; width:52%; height:60%; background:var(--side); z-index:4}  
+.side.left{left:0; clip-path:polygon(0 0, 100% 52%, 0 100%)}  
+.side.right{right:0; clip-path:polygon(100% 0, 0 52%, 100% 100%)}  
+.bottom{position:absolute; left:50%; transform:translateX(-50%); bottom:0; width:100%; height:56%; background:var(--pocket); z-index:4; clip-path:polygon(50% 0, 0 100%, 100% 100%)}  
+
+/* Верхний клапан */  
+.flap{position:absolute; top:0; left:0; width:100%; height:58%; transform-origin:top center; transform-style:preserve-3d; transition:transform .9s cubic-bezier(.2,.7,.2,1); z-index:5}  
+.flap-face{position:absolute; inset:0; backface-visibility:hidden}  
+.flap-front{background:var(--flap-front); clip-path:polygon(50% 100%, 0 0, 100% 0)}  
+.flap-back{background:var(--flap-back); clip-path:polygon(50% 0, 0 100%, 100% 100%); transform:rotateX(180deg)}  
+
+/* Анимации состояний */  
+.open .flap{transform:rotateX(-180deg)}   /* раскрываем крышку */  
+.open .letter{transform:translateY(-180%)} /* письмо теперь полностью выезжает */  
+
+.restart{margin-top:6px; background:#fff; color:var(--accent); border:2px solid var(--accent)}  
+.hidden{display:none}  
+
+@media (max-width:380px){  
+  .envelope{width:300px; height:212px}  
+}  
+  </style>  
+</head>  
+<body>  
+  <div class="app">  
+    <!-- ПАНЕЛЬ ВОПРОСА -->  
+    <div id="qPanel" class="panel">  
+      <h1>📩 Открыть письмо?</h1>  
+      <div class="buttons">  
+        <button onclick="openLetter()">Открыть</button>  
+        <button onclick="dontOpen()">Не открывать</button>  
+      </div>  
+      <div id="msg" class="msg"></div>  
+    </div>  
+
+<!-- СЦЕНА С КОНВЕРТОМ -->  
+<div id="stage" class="stage">  
+  <div class="envelope" id="envelope">  
+    <div class="env-back"></div>  
+
+    <div class="letter">  
+      <div class="greet">Привет, мой любимый! 💌
+Хочу поздравить тебя с этим наипрекраснейшим днём! Желаю тебе крепкого здоровья, достатка, невероятной удачи и всего самого наилучшего. Надеюсь, что именно сегодня у тебя будет самое светлое и тёплое настроение^^
+
+Я поздравляю тебя от чистого сердца, ведь для меня этот день очень важен, не меньше чем любой другой праздник. Ты самый дорогой и важный человек в моей жизни, и я безумно счастлива, что судьба подарила мне тебя. Это уже второй твой день рождения, который мы встречаем вдвоём, как пара, и я хочу, чтобы впереди у нас было ещё бесконечно много таких моментов. Я очень хочу, чтобы мы всегда были вместе и были счастливы друг с другом.
+
+Ведь когда у нас есть мы друг друга, то нам точно никогда не будет одиноко. Я хочу, что бы в этот день ты был для всех вокруг самым любимым и важным, как и для меня. И мне так радостно осознавать, что я могу дарить тебе такие подарки, вкладывая в них всю душу. Я надеюсь, что они принесут тебе радость, потому что я очень старалась для тебя.
+
+Больше всего я хочу, чтобы этот день запомнился тебе как яркий, светлый и радостный. Пусть ты проведёшь его весело, получишь множество милых и искренних поздравлений, и пусть все хорошие пожелания, которые сегодня будут сказаны в твой адрес, непременно сбудутся.
+
+Я тебя очень очень очень сильно люблю, ценю и дорожу тобой. Поэтому знай что при любых обстоятельствах, в любой момент, я безумно тебя люблю и всегда буду с тобой до конца своих дней. Ты моё счастье, моя опора и самый главный человек в мире.
+
+С днём рождения, мой дорогой и самый самый любимый мальчик! ❤️</div>  
+    </div>  
+
+    <div class="side left"></div>  
+    <div class="side right"></div>  
+    <div class="bottom"></div>  
+
+    <div class="flap" id="flap">  
+      <div class="flap-face flap-front"></div>  
+      <div class="flap-face flap-back"></div>  
+    </div>  
+  </div>  
+
+  <button class="restart" onclick="restart()"> Ещё раз?)</button>  
+</div>  
+
+  </div>  
+  <script>  
+    const qPanel = document.getElementById('qPanel');  
+    const stage  = document.getElementById('stage');  
+    const env    = document.getElementById('envelope');  
+    const msg    = document.getElementById('msg');  
+
+    function openLetter(){  
+      qPanel.classList.add('hidden');  
+      stage.classList.add('show');  
+      setTimeout(()=> env.classList.add('open'), 50);  
+    }  
+
+    function dontOpen(){  
+      msg.textContent = 'Ну прочти письмо пожалуйста 🙏';  
+      msg.classList.add('shake');  
+      setTimeout(()=> {  
+        msg.classList.remove('shake');  
+        msg.textContent = '';  
+      }, 1600);  
+    }  
+
+    function restart(){  
+      env.classList.remove('open');  
+      stage.classList.remove('show');  
+      qPanel.classList.remove('hidden');  
+      window.scrollTo({top:0, behavior:'smooth'});  
+    }  
+  </script>  
+</body>  
+  </html>
